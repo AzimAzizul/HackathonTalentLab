@@ -1,96 +1,82 @@
 # Spring Boot E-Commerce Backend
 
-Small e-commerce REST API built with Spring Boot, PostgreSQL, Gradle, and Docker Compose.
+Backend service for a small e-commerce workflow: products, carts, checkout, and order history.
 
-## What it includes
+## Stack
 
-- Seeded users and product catalog
+- Java 21 and Spring Boot
+- PostgreSQL 16
+- Spring Data JPA
+- Gradle
+- Docker Compose
+- Springdoc OpenAPI
+
+## Features
+
+- Product catalog with seeded electronics and clothing items
 - One active cart per user
-- Cart item add, update, and remove operations
-- Checkout with stock validation
+- Add, update, and remove cart items
+- Transactional checkout with stock validation
 - Order history and order details
-- Swagger UI
+- Consistent JSON error responses
+- Swagger UI for API exploration
 
-This is the first MVP. It does not include authentication, RBAC, Redis, Kafka, Sagas, AWS deployment, rate limiting, optimistic locking, or automated tests.
+## API overview
 
-## Requirements
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/products` | List products |
+| GET | `/api/products/{productId}` | Get a product |
+| GET | `/api/users/{userId}/cart` | Get active cart |
+| POST | `/api/users/{userId}/cart/items` | Add a cart item |
+| PATCH | `/api/users/{userId}/cart/items/{productId}` | Change item quantity |
+| DELETE | `/api/users/{userId}/cart/items/{productId}` | Remove a cart item |
+| POST | `/api/users/{userId}/cart/checkout` | Create an order |
+| GET | `/api/users/{userId}/orders` | List user orders |
+| GET | `/api/orders/{orderId}` | Get order details |
 
-- Java 21
-- Docker Desktop
+## Local run
 
-The Gradle Wrapper downloads Gradle automatically when `./gradlew` is first run.
-
-## Start PostgreSQL
+Requirements: Java 21 and Docker.
 
 ```bash
 cp .env.example .env
 docker compose up -d postgres
 docker compose ps
-```
-
-PostgreSQL is available at `localhost:5432`. On first startup, Docker runs `database/schema.sql` and `database/data.sql`.
-
-## Start the application
-
-```bash
+chmod +x gradlew
 ./gradlew bootRun
 ```
 
-The API runs on `http://localhost:8080`.
+PostgreSQL listens on `localhost:5432`. The API listens on `http://localhost:8080`.
 
-## Swagger UI
+Database tables and seed records are defined in `database/schema.sql` and `database/data.sql`. Docker loads them when the PostgreSQL volume is created.
 
-Open this URL in a browser:
+## API documentation
 
-```text
-http://localhost:8080/swagger-ui/index.html
-```
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
-Swagger UI shows every endpoint and lets you send requests from the browser. The OpenAPI document is available at `http://localhost:8080/v3/api-docs`.
-
-## Demo commands
-
-List products:
+## Example flow
 
 ```bash
 curl http://localhost:8080/api/products
-```
 
-Add product `1` to user `1`'s cart:
-
-```bash
 curl -X POST http://localhost:8080/api/users/1/cart/items \
   -H "Content-Type: application/json" \
   -d '{"productId":1,"quantity":2}'
-```
 
-View the cart:
-
-```bash
 curl http://localhost:8080/api/users/1/cart
-```
 
-Update the quantity:
-
-```bash
 curl -X PATCH http://localhost:8080/api/users/1/cart/items/1 \
   -H "Content-Type: application/json" \
   -d '{"quantity":3}'
-```
 
-Checkout:
-
-```bash
 curl -X POST http://localhost:8080/api/users/1/cart/checkout
-```
 
-View user orders:
-
-```bash
 curl http://localhost:8080/api/users/1/orders
 ```
 
-Product `5` is out of stock. Add it to a new cart and checkout to see a `409 Conflict` response:
+Product `5` has zero stock and can be used to check the `409 Conflict` checkout response.
 
 ```bash
 curl -X POST http://localhost:8080/api/users/1/cart/items \
@@ -100,20 +86,13 @@ curl -X POST http://localhost:8080/api/users/1/cart/items \
 curl -X POST http://localhost:8080/api/users/1/cart/checkout
 ```
 
-## Resetting the database
-
-Seed files run only when PostgreSQL creates a new data volume. To reload them, stop the stack and intentionally remove the Compose volume:
+## Reset local data
 
 ```bash
 docker compose down -v
 docker compose up -d postgres
 ```
 
-## Next steps
+## Scope
 
-1. Add optimistic locking and concurrent checkout checks.
-2. Add JWT authentication and RBAC.
-3. Add Redis caching and rate limiting.
-4. Add Kafka event handling.
-5. Add saga compensation.
-6. Add CI and AWS deployment.
+The current version focuses on the checkout workflow and basic stock checks. Authentication, RBAC, optimistic locking, Redis, Kafka, saga handling, CI, and AWS deployment are planned extensions.
