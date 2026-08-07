@@ -35,6 +35,14 @@ public class Product {
     protected Product() {
     }
 
+    public Product(String name, String description, BigDecimal price, int availableQuantity) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.availableQuantity = availableQuantity;
+        this.createdAt = OffsetDateTime.now();
+    }
+
     public Long getId() {
         return id;
     }

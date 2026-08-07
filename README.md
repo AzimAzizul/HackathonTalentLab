@@ -183,6 +183,14 @@ PostgreSQL listens on `localhost:5432`. The API listens on `http://localhost:808
 
 Database tables and seed records are defined in `database/schema.sql` and `database/data.sql`. Docker loads them when the PostgreSQL volume is created.
 
+## Tests
+
+```bash
+./gradlew test
+```
+
+The unit tests cover cart changes and checkout success and failure cases. JaCoCo writes an HTML report to `build/reports/jacoco/test/html/index.html`. GitHub Actions runs the same command on pushes and pull requests.
+
 ## API documentation
 
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
