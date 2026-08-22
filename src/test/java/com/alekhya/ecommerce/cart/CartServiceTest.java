@@ -80,7 +80,7 @@ class CartServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(cartRepository.findByUserIdAndStatus(1L, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
 
-        CartResponse response = cartService.updateItem(1L, 1L, new UpdateQuantityRequest(4));
+        CartResponse response = cartService.updateItem(1L, 1L, null, new UpdateQuantityRequest(4));
 
         assertThat(response.items().getFirst().quantity()).isEqualTo(4);
     }
@@ -91,7 +91,7 @@ class CartServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(cartRepository.findByUserIdAndStatus(1L, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
 
-        cartService.removeItem(1L, 1L);
+        cartService.removeItem(1L, 1L, null);
 
         assertThat(cart.getItems()).isEmpty();
     }
@@ -104,6 +104,33 @@ class CartServiceTest {
         assertThatThrownBy(() -> cartService.getActiveCart(1L))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("does not have an active cart");
+    }
+
+    @Test
+    void addItemRejectsADiscontinuedProduct() {
+        product.markDiscontinued();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(cartRepository.findByUserIdAndStatus(1L, CartStatus.ACTIVE)).thenReturn(Optional.of(new Cart(user)));
+        when(productService.findProduct(1L)).thenReturn(product);
+
+        assertThatThrownBy(() -> cartService.addItem(1L, new CartItemRequest(1L, 2)))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("discontinued");
+    }
+
+    @Test
+    void addItemSeparatesItemsByVariant() {
+        Cart cart = new Cart(user);
+        cart.addItem(new CartItem(cart, product, 1, "M"));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(cartRepository.findByUserIdAndStatus(1L, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
+        when(productService.findProduct(1L)).thenReturn(product);
+
+        CartResponse response = cartService.addItem(1L, new CartItemRequest(1L, 1, "L"));
+
+        assertThat(response.items()).hasSize(2);
+        assertThat(response.items().getFirst().variant()).isEqualTo("M");
+        assertThat(response.items().getLast().variant()).isEqualTo("L");
     }
 
     private Cart activeCartWithItem(int quantity) {

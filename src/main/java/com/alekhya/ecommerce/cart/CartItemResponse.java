@@ -1,5 +1,6 @@
 package com.alekhya.ecommerce.cart;
 
+import com.alekhya.ecommerce.product.ProductStatus;
 import java.math.BigDecimal;
 
 public record CartItemResponse(
@@ -7,7 +8,9 @@ public record CartItemResponse(
         String productName,
         BigDecimal price,
         int quantity,
-        BigDecimal lineTotal
+        String variant,
+        BigDecimal lineTotal,
+        boolean discontinued
 ) {
     public static CartItemResponse from(CartItem item) {
         BigDecimal lineTotal = item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
@@ -16,7 +19,9 @@ public record CartItemResponse(
                 item.getProduct().getName(),
                 item.getProduct().getPrice(),
                 item.getQuantity(),
-                lineTotal
+                item.getVariant(),
+                lineTotal,
+                item.getProduct().getStatus() == ProductStatus.DISCONTINUED
         );
     }
 }

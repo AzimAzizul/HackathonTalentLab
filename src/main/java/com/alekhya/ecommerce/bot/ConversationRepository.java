@@ -1,0 +1,8 @@
+package com.alekhya.ecommerce.bot;
+
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ConversationRepository extends JpaRepository<Conversation, Long> {
+    Optional<Conversation> findTopByUserIdAndStatusOrderByCreatedAtDesc(Long userId, ConversationStatus status);
+}

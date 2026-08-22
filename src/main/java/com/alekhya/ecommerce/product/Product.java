@@ -2,6 +2,8 @@ package com.alekhya.ecommerce.product;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,6 +31,16 @@ public class Product {
     @Column(name = "available_quantity", nullable = false)
     private int availableQuantity;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProductStatus status;
+
+    @Column(name = "variant_name")
+    private String variantName;
+
+    @Column(name = "variant_options")
+    private String variantOptions;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -40,6 +52,7 @@ public class Product {
         this.description = description;
         this.price = price;
         this.availableQuantity = availableQuantity;
+        this.status = ProductStatus.ACTIVE;
         this.createdAt = OffsetDateTime.now();
     }
 
@@ -61,6 +74,46 @@ public class Product {
 
     public int getAvailableQuantity() {
         return availableQuantity;
+    }
+
+    public ProductStatus getStatus() {
+        return status;
+    }
+
+    public String getVariantName() {
+        return variantName;
+    }
+
+    public String getVariantOptions() {
+        return variantOptions;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public void setAvailableQuantity(int availableQuantity) {
+        this.availableQuantity = availableQuantity;
+    }
+
+    public void setVariantName(String variantName) {
+        this.variantName = variantName;
+    }
+
+    public void setVariantOptions(String variantOptions) {
+        this.variantOptions = variantOptions;
+    }
+
+    public void markDiscontinued() {
+        this.status = ProductStatus.DISCONTINUED;
     }
 
     public void reduceQuantity(int quantity) {

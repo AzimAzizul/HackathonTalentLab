@@ -13,5 +13,11 @@ spring:
     default-property-inclusion: non_null
 
 server:
-  port: 8080
+  port: ${PORT:8080}
   forward-headers-strategy: framework
+
+app:
+  ai:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-3.6-flash}
+    base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}

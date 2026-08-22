@@ -7,6 +7,7 @@ import com.alekhya.ecommerce.cart.CartStatus;
 import com.alekhya.ecommerce.common.BadRequestException;
 import com.alekhya.ecommerce.common.ConflictException;
 import com.alekhya.ecommerce.common.NotFoundException;
+import com.alekhya.ecommerce.product.ProductStatus;
 import com.alekhya.ecommerce.user.User;
 import com.alekhya.ecommerce.user.UserRepository;
 import java.math.BigDecimal;
@@ -35,6 +36,12 @@ public class OrderService {
 
         if (cart.getItems().isEmpty()) {
             throw new BadRequestException("The active cart is empty.");
+        }
+
+        boolean hasDiscontinuedProduct = cart.getItems().stream()
+                .anyMatch(item -> item.getProduct().getStatus() == ProductStatus.DISCONTINUED);
+        if (hasDiscontinuedProduct) {
+            throw new ConflictException("The cart contains discontinued products. Remove them before checking out.");
         }
 
         for (CartItem item : cart.getItems()) {

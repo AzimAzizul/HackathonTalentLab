@@ -95,6 +95,22 @@ class OrderServiceTest {
         verify(orderRepository, never()).save(any(CustomerOrder.class));
     }
 
+    @Test
+    void checkoutRejectsACartWithADiscontinuedProduct() {
+        Product product = product(1L, "Keyboard", "3499.00", 5);
+        product.markDiscontinued();
+        Cart cart = new Cart(user);
+        cart.addItem(new CartItem(cart, product, 2));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(cartRepository.findByUserIdAndStatus(1L, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
+
+        assertThatThrownBy(() -> orderService.checkout(1L))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("discontinued");
+
+        verify(orderRepository, never()).save(any(CustomerOrder.class));
+    }
+
     private Product product(Long id, String name, String price, int quantity) {
         Product product = new Product(name, "Description", new BigDecimal(price), quantity);
         ReflectionTestUtils.setField(product, "id", id);

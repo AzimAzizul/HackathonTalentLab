@@ -28,13 +28,20 @@ public class CartItem {
 
     private int quantity;
 
+    private String variant;
+
     protected CartItem() {
     }
 
     public CartItem(Cart cart, Product product, int quantity) {
+        this(cart, product, quantity, "");
+    }
+
+    public CartItem(Cart cart, Product product, int quantity, String variant) {
         this.cart = cart;
         this.product = product;
         this.quantity = quantity;
+        this.variant = variant == null ? "" : variant;
     }
 
     public Product getProduct() {
@@ -43,6 +50,10 @@ public class CartItem {
 
     public int getQuantity() {
         return quantity;
+    }
+
+    public String getVariant() {
+        return variant;
     }
 
     public void increaseQuantity(int quantity) {
