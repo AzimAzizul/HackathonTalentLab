@@ -1,1 +1,9 @@
+pluginManagement {
+    repositories {
+        // Google mirror first: Maven Central rate-limits shared CI IPs (Render) with 429
+        maven { url 'https://maven-central.storage-download.googleapis.com/maven2/' }
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'spring-boot-ecommerce-backend'
