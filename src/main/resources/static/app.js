@@ -977,8 +977,9 @@ document.addEventListener("submit", async (event) => {
       await handleUpdateProduct(form);
     } else if (kind === "bot") {
       const input = form.querySelector("#bot-input");
-      await sendBotMessage(input.value);
+      const text = input.value;
       input.value = "";
+      await sendBotMessage(text);
     }
   } catch (error) {
     showToast(error.message || "Something went wrong.", "error");
