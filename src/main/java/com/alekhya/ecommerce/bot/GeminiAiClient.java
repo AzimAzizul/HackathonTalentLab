@@ -74,10 +74,22 @@ public class GeminiAiClient implements AiClient {
         }
     }
 
-    private String extractText(String response) {
+    String extractText(String response) {
         try {
             JsonNode root = objectMapper.readTree(response);
-            String text = root.path("candidates").path(0).path("content").path("parts").path(0).path("text").asText("");
+            JsonNode candidate = root.path("candidates").path(0);
+            // Gemini may split one answer across several parts; skip "thought" parts from thinking models.
+            StringBuilder builder = new StringBuilder();
+            for (JsonNode part : candidate.path("content").path("parts")) {
+                if (!part.path("thought").asBoolean(false)) {
+                    builder.append(part.path("text").asText(""));
+                }
+            }
+            String text = builder.toString();
+            String finishReason = candidate.path("finishReason").asText("");
+            if (!finishReason.isEmpty() && !"STOP".equals(finishReason)) {
+                log.warn("Gemini finished with reason {}; reply may be incomplete.", finishReason);
+            }
             if (text.isBlank()) {
                 log.warn("Gemini returned an empty text field; raw response: {}", response);
                 throw new IllegalStateException("Gemini returned an empty response.");
